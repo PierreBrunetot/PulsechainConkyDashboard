@@ -118,8 +118,35 @@ cat << 'EOF' > ~/validator_count.sh
 lighthouse validators list | wc -l
 EOF
 
+# Create the check_sync.sh script
+echo "Creating the check_sync.sh script..."
+
+cat << 'EOF' > ~/check_sync.sh
+#!/bin/bash
+
+response=$(curl -s http://localhost:5052/eth/v1/node/syncing)
+is_syncing=$(echo "$response" | grep -oP '"is_syncing":\K(true|false)')
+
+if [ "$is_syncing" = "true" ]; then
+    echo '${color yellow}⟳ Syncing${color}'
+else
+    echo '${color green}✓ Synced${color}'
+fi
+EOF
+
+# Create the validator_efficiency.py script
+echo "Creating the validator_efficiency.py script..."
+
+cat << 'EOF' > ~/validator_efficiency.py
+# This is a placeholder for the validator_efficiency.py script.
+# Please update this file with the actual content.
+EOF
+
 # Make the scripts executable
 chmod +x ~/validator_count.sh
+chmod +x ~/check_sync.sh
+chmod +x ~/validator_efficiency.py
 
 echo "Installation completed. You can now launch Conky with the following configuration:"
 echo "conky -c ~/.config/conky/conky.conf"
+
