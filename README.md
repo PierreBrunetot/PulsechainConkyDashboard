@@ -38,7 +38,22 @@ To automatically install and configure the necessary dependencies, you can use t
 
 4. Launch Conky:
    conky -c ~/.config/conky/conky.conf
- 
+   
+## Updating the PATH
+
+To include `/opt/lighthouse` in your `PATH`, follow these steps:
+
+1. Open your shell configuration file (e.g., `.bashrc`, `.zshrc`, etc.) in a text editor.
+
+2. Add the following line to the file:
+   ```bash
+   export PATH=$PATH:/opt/lighthouse
+
+3. Save the changes to the file.
+
+4. Apply the changes by running the appropriate command for your shell:
+   source ~/.bashrc  # For Bash users
+   
 ## Setting Up the Desktop Wallpaper
 
 This repository includes a custom desktop wallpaper named `minimal.png`, sourced from PulseChain's official branding assets.
