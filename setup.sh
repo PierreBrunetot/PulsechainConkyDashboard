@@ -94,9 +94,9 @@ ${font DejaVu Sans:size=12}${color2}Wi-Fi Temperature ${goto 280}${execi 10 sens
 ${font DejaVu Sans:size=12}${color2}Geth Service ${goto 280}${if_match "${execi 60 systemctl is-active geth.service}"=="active"}${color #00cc44}✓ Active${else}${color red}✗ Inactive${endif}${color}
 ${font DejaVu Sans:size=12}${color2}Lighthouse Beacon ${goto 280}${if_match "${execi 60 systemctl is-active lighthouse-beacon.service}"=="active"}${color #00cc44}✓ Active${else}${color red}✗ Inactive${endif}${color}
 ${font DejaVu Sans:size=12}${color2}Lighthouse Validator ${goto 280}${if_match "${execi 60 systemctl is-active lighthouse-validator.service}"=="active"}${color #00cc44}✓ Active${else}${color red}✗ Inactive${endif}${color}
-${font DejaVu Sans:size=12}${color2}Sync Status ${goto 280}${execi 60 ${HOME}/scripts/check_sync.sh | grep 'is_synced' | awk '{print $2}' | tr -d '\n' | tr -d ' '}${if_match "${execi 60 ${HOME}/scripts/check_sync.sh | grep 'is_synced' | awk '{print $2}' | tr -d '\n' | tr -d ' '}"}${color #00cc44}✓ Synced${else}${color yellow}⟳ Syncing${end>
-${font DejaVu Sans:size=12}${color2}Geth Sync Status ${goto 280}${if_match "${execi 60 curl -s http://localhost:8545 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' | jq -r '.result'}"=="false"}${color #00cc44}✓ Synced${else}${color yellow}⟳ Syncing${endif}${color}
-${font DejaVu Sans:size=12}${color2}Validator Status ${goto 280}${if_match "${execi 60 curl -s http://localhost:8545 -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' | jq -r '.result'}"=="false"}${color #00cc44}✓ Active${else}${color yellow}⟳ Syncing${endif}${color}
+${font DejaVu Sans:size=12}${color2}Sync Status ${goto 280}${execi 60 ${HOME}/scripts/check_sync.sh}
+${font DejaVu Sans:size=12}${color2}Geth Sync Status ${goto 280}${if_match "${execi 60 curl -s http://localhost:8545 -X POST -H \"Content-Type: application/json\" --data '{\"jsonrpc\":\"2.0\",\"method\":\"eth_syncing\",\"params\":[],\"id\":1}' | jq -r '.result'}"=="false"}${color #00cc44}✓ Synced${else}${color yellow}⟳ Syncing${endif}${color}
+${font DejaVu Sans:size=12}${color2}Validator Status ${goto 280}${if_match "${execi 60 curl -s http://localhost:8545 -X POST -H \"Content-Type: application/json\" --data '{\"jsonrpc\":\"2.0\",\"method\":\"eth_syncing\",\"params\":[],\"id\":1}' | jq -r '.result'}"=="false"}${color #00cc44}✓ Active${else}${color yellow}⟳ Syncing${endif}${color}
 ${font DejaVu Sans:size=12}${color2}Active Validators ${goto 280}${execi 60 ${HOME}/validator_count.sh}
 ${font DejaVu Sans:size=12}${color2}Latest Block ${goto 280}${execi 300 python3 ${HOME}/validator_efficiency.py | grep "Latest Block" | cut -d ":" -f2 | tr -d " "}
 ${font DejaVu Sans:size=12}${color2}Geth Connected Peers ${goto 280}${execi 60 python3 ${HOME}/validator_efficiency.py | grep "Geth Connected Peers" | cut -d ":" -f2 | tr -d " "}
@@ -105,6 +105,8 @@ ${font DejaVu Sans:size=12}${color2}Block Time ${goto 280}${execi 60 python3 ${H
 ${font DejaVu Sans:size=12}${color2}Latest Log ${goto 280}${execi 60 tail -n 20 ~/.ethereum/geth.log | tail -n 1}
 ]];
 EOF
+
+echo "Conky configuration complete."
 
 # Create the pulsechain_balance.py script
 echo "Creating pulsechain_balance.py..."
@@ -225,3 +227,4 @@ chmod +x ~/validator_efficiency.py
 
 echo "Installation completed. You can now launch Conky with the following configuration:"
 echo "conky -c ~/.config/conky/conky.conf"
+
