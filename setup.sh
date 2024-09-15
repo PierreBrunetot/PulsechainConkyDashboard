@@ -77,154 +77,100 @@ conky.config = {
 };
 
 conky.text = [[
+${if_match "${execi 5 ${HOME}/scripts/check_internet.sh}" == "online"}
 ${color1}${font DejaVu Sans:bold:size=14}Server Status${font}
 ${color5}${hr 4}
-${font DejaVu Sans:size=12}${color2}Uptime ${goto 280}${uptime}
-${font DejaVu Sans:size=12}${color2}CPU Usage ${goto 280}${cpu}% ${goto 320}${color1}${cpubar 5,350}
-${font DejaVu Sans:size=12}${color2}RAM Usage ${goto 280}${exec ${HOME}/.config/conky/format_ram.sh} ${goto 365}${color1}${membar 5,305}
-${font DejaVu Sans:size=12}${color2}Disk Usage ${goto 280}${fs_used /} / ${fs_size /} (${fs_used_perc /}%) ${goto 475}${color1}${fs_bar 5,195 /}
-${font DejaVu Sans:size=12}${color2}Swap Usage ${goto 280}${color2}${execi 60 ${HOME}/scripts/check_swap.sh}${goto 385}${color1}${swapbar 5,285}
-${font DejaVu Sans:size=12}${color2}Download/Upload:${goto 280}${execi 5 ${HOME}/vnstat_and_ifstat_stats.sh | sed 's/ / \/ /2'}
-${font DejaVu Sans:size=12}${color2}Network Latency ${goto 280}${color2}${execi 300 ping -c 3 8.8.8.8 | tail -1 | awk '{print $4}' | cut -d '/' -f 2} ms${color}
-${font DejaVu Sans:size=12}${color2}CPU Temperature ${goto 280}${execi 10 sensors | awk '/Core [0-9]+/ {sum += $3; count++} END {printf "%.1f°C", int(sum/count)}'}
-${font DejaVu Sans:size=12}${color2}SSD Temperature ${goto 280}${execi 10 sudo /usr/sbin/nvme smart-log /dev/nvme0 | grep temperature | awk '{printf "%.1f°C", $3+0.0}'}
-${font DejaVu Sans:size=12}${color2}ACPI Temperature ${goto 280}${execi 10 sensors -u | awk '/acpitz-acpi-0/,/^$/' | grep 'temp1_input' | awk '{printf "%.1f°C", $2+0.0}'}
-${font DejaVu Sans:size=12}${color2}Wi-Fi Temperature ${goto 280}${execi 10 sensors -u | awk '/iwlwifi_1-virtual-0/,/^$/' | grep 'temp1_input' | awk '{printf "%.1f°C", $2}'}
+${font DejaVu Sans:size=12}${color2}Uptime ${goto 330}${uptime}
+${font DejaVu Sans:size=12}${color2}CPU Usage ${goto 330}${cpu}% ${goto 370}${color1}${cpubar 5,350}
+${font DejaVu Sans:size=12}${color2}RAM Usage ${goto 330}${execi 5 ${HOME}/.config/conky/format_ram.sh} ${goto 421}${color1}${membar 5,299}
+${font DejaVu Sans:size=12}${color2}Disk Usage ${goto 330}${fs_used /} / ${fs_size /} (${fs_used_perc /}%) ${goto 525}${color1}${fs_bar 5,195 /}
+${font DejaVu Sans:size=12}${color2}Swap Usage ${goto 330}${execi 5 ${HOME}/scripts/check_swap.sh}${goto 437}${color1}${swapbar 5,283}
+${font DejaVu Sans:size=12}${color2}Download/Upload:${goto 330}${execi 5 ${HOME}/vnstat_and_ifstat_stats.sh | sed 's/ / \/ /2'}
+${font DejaVu Sans:size=12}${color2}Network Latency ${goto 330}${execi 5 timeout 2 ping -c 1 8.8.8.8 | awk -F'/' 'END{print $5}' || echo "N/A"} ms${color}
+${font DejaVu Sans:size=12}${color2}CPU Temperature ${goto 330}${execi 5 sensors | awk '/Core [0-9]+/ {sum += $3; count++} END {printf "%.1f°C", int(sum/count)}'}
+${font DejaVu Sans:size=12}${color2}SSD Temperature ${goto 330}${execi 5 sudo /usr/sbin/nvme smart-log /dev/nvme0 | grep temperature | awk '{printf "%.1f°C", $3+0.0}'}
+${font DejaVu Sans:size=12}${color2}ACPI Temperature ${goto 330}${execi 5 sensors -u | awk '/acpitz-acpi-0/,/^$/' | grep 'temp1_input' | awk '{printf "%.1f°C", $2+0.0}'}
+${font DejaVu Sans:size=12}${color2}Wi-Fi Temperature ${goto 330}${execi 5 sensors -u | awk '/iwlwifi_1-virtual-0/,/^$/' | grep 'temp1_input' | awk '{printf "%.1f°C", $2}'}
 
-${font DejaVu Sans:size=12}${color2}Geth Service ${goto 280}${if_match "${execi 60 systemctl is-active geth.service}"=="active"}${color #00cc44}✓ Active${else}${color red}✗ Inactive${endif}${color}
-${font DejaVu Sans:size=12}${color2}Lighthouse Beacon ${goto 280}${if_match "${execi 60 systemctl is-active lighthouse-beacon.service}"=="active"}${color #00cc44}✓ Active${else}${color red}✗ Inactive${endif}${color}
-${font DejaVu Sans:size=12}${color2}Lighthouse Validator ${goto 280}${if_match "${execi 60 systemctl is-active lighthouse-validator.service}"=="active"}${color #00cc44}✓ Active${else}${color red}✗ Inactive${endif}${color}
-${font DejaVu Sans:size=12}${color2}Sync Status ${goto 280}${execi 60 ${HOME}/scripts/check_sync.sh}
-${font DejaVu Sans:size=12}${color2}Geth Sync Status ${goto 280}${if_match "${execi 60 curl -s http://localhost:8545 -X POST -H \"Content-Type: application/json\" --data '{\"jsonrpc\":\"2.0\",\"method\":\"eth_syncing\",\"params\":[],\"id\":1}' | jq -r '.result'}"=="false"}${color #00cc44}✓ Synced${else}${color yellow}⟳ Syncing${endif}${color}
-${font DejaVu Sans:size=12}${color2}Validator Status ${goto 280}${if_match "${execi 60 curl -s http://localhost:8545 -X POST -H \"Content-Type: application/json\" --data '{\"jsonrpc\":\"2.0\",\"method\":\"eth_syncing\",\"params\":[],\"id\":1}' | jq -r '.result'}"=="false"}${color #00cc44}✓ Active${else}${color yellow}⟳ Syncing${endif}${color}
-${font DejaVu Sans:size=12}${color2}Active Validators ${goto 280}${execi 60 ${HOME}/validator_count.sh}
-${font DejaVu Sans:size=12}${color2}Latest Block ${goto 280}${execi 300 python3 ${HOME}/validator_efficiency.py | grep "Latest Block" | cut -d ":" -f2 | tr -d " "}
-${font DejaVu Sans:size=12}${color2}Geth Connected Peers ${goto 280}${execi 60 python3 ${HOME}/validator_efficiency.py | grep "Geth Connected Peers" | cut -d ":" -f2 | tr -d " "}
-${font DejaVu Sans:size=12}${color2}Lighthouse Connected Peers ${goto 280}${execi 60 python3 ${HOME}/validator_efficiency.py | grep "Lighthouse Connected Peers" | cut -d ":" -f2 | tr -d " "}
-${font DejaVu Sans:size=12}${color2}Block Time ${goto 280}${execi 60 python3 ${HOME}/validator_efficiency.py | grep "Block Time" | cut -d ":" -f2 | tr -d " "}
-${font DejaVu Sans:size=12}${color2}Latest Log ${goto 280}${execi 60 tail -n 20 ~/.ethereum/geth.log | tail -n 1}
-]];
+${font DejaVu Sans:size=12}${color2}Geth Service ${goto 330}${if_match "${execi 5 systemctl is-active geth.service}" == "active"}${color #00cc44}✓ Active${else}${color red}✗ Inactive${endif}${color}
+${font DejaVu Sans:size=12}${color2}Lighthouse Beacon ${goto 330}${if_match "${execi 5 systemctl is-active lighthouse-beacon.service}" == "active"}${color #00cc44}✓ Active${else}${color red}✗ Inactive${endif}${color}
+${font DejaVu Sans:size=12}${color2}Lighthouse Validator ${goto 330}${if_match "${execi 5 systemctl is-active lighthouse-validator.service}" == "active"}${color #00cc44}✓ Active${else}${color red}✗ Inactive${endif}${color}
+${font DejaVu Sans:size=12}${color2}Geth Sync Status ${goto 330}${if_match "${execi 10 timeout 2 curl -s http://localhost:8545 -X POST -H 'Content-Type: application/json' --data '{\"jsonrpc\":\"2.0\",\"method\":\"eth_syncing\",\"params\":[],\"id\":1}' | jq -r '.result'}" == "false"}${color #00cc44}✓ Synced${else}${color red}✗ Syncing${endif}${color}
+${font DejaVu Sans:size=12}${color2}Sync Status ${goto 330}${if_match "${execi 10 timeout 2 ${HOME}/scripts/check_sync.sh | grep 'is_synced' | awk '{print $2}' | tr -d '\n' | tr -d ' '}" == "true"}${color #00cc44}✓ Synced${else}${color red}✗ Syncing${endif}${color}
+${font DejaVu Sans:size=12}${color2}Active Validators ${goto 330}${execi 10 ${HOME}/validator_count.sh || echo "N/A"}
+${font DejaVu Sans:size=12}${color2}Latest Block ${goto 330}${execi 10 timeout 5 python3 ${HOME}/validator_efficiency.py | grep "Latest Block" | cut -d ":" -f2 | tr -d " " || echo "N/A"}
+${font DejaVu Sans:size=12}${color2}Geth Connected Peers ${goto 330}${execi 10 timeout 5 python3 ${HOME}/validator_efficiency.py | grep "Geth Connected Peers" | cut -d ":" -f2 | tr -d " " || echo "N/A"}
+${font DejaVu Sans:size=12}${color2}Lighthouse Connected Peers ${goto 330}${execi 10 timeout 5 python3 ${HOME}/validator_efficiency.py | grep "Lighthouse Connected Peers" | cut -d ":" -f2 | tr -d " " || echo "N/A"}
+
+${color1}${font DejaVu Sans:bold:size=14}Lighthouse Beacon Logs${font}
+${color5}${hr 4}
+${color2}${execpi 10 journalctl -u lighthouse-beacon.service --no-pager -n 3 | fold -w 70 | head -n 6}
+
+${color1}${font DejaVu Sans:bold:size=14}Lighthouse Validator Logs${font}
+${color5}${hr 4}
+${color2}${execpi 10 journalctl -u lighthouse-validator.service --no-pager -n 3 | fold -w 70 | head -n 6}
+
+${color1}${font DejaVu Sans:bold:size=14}Geth Logs${font}
+${color5}${hr 4}
+${color2}${execpi 10 journalctl -u geth.service --no-pager -n 3 | fold -w 70 | head -n 6}
+
+${color1}${font DejaVu Sans:bold:size=14}PLS Balance${font}
+${color5}${hr 4}
+${font DejaVu Sans:size=12}${color #E0E0E0}PLS Balance ${goto 330}${execi 300 python3 ${HOME}/pulsechain_balance.py | sed -n 1p || echo "N/A"} PLS
+${font DejaVu Sans:size=12}${color lightgrey}Last Increase ${goto 330}${color 00cc44}${execi 300 python3 ${HOME}/pulsechain_balance.py | sed -n 2p || echo "N/A"}${color}
+
+${else}
+
+${color1}${font DejaVu Sans:bold:size=14}Server Status${font}
+${color5}${hr 4}
+${font DejaVu Sans:size=12}${color2}Uptime ${goto 330}${uptime}
+${font DejaVu Sans:size=12}${color2}CPU Usage ${goto 330}${cpu}% ${goto 370}${color1}${cpubar 5,350}
+${font DejaVu Sans:size=12}${color2}RAM Usage ${goto 330}${execi 5 ${HOME}/.config/conky/format_ram.sh} ${goto 421}${color1}${membar 5,299}
+${font DejaVu Sans:size=12}${color2}Disk Usage ${goto 330}${fs_used /} / ${fs_size /} (${fs_used_perc /}%) ${goto 525}${color1}${fs_bar 5,195 /}
+${font DejaVu Sans:size=12}${color2}Swap Usage ${goto 330}${execi 5 ${HOME}/scripts/check_swap.sh}${goto 437}${color1}${swapbar 5,283}
+${font DejaVu Sans:size=12}${color2}CPU Temperature ${goto 330}${execi 5 sensors | awk '/Core [0-9]+/ {sum += $3; count++} END {printf "%.1f°C", int(sum/count)}'}
+${font DejaVu Sans:size=12}${color2}SSD Temperature ${goto 330}${execi 5 sudo /usr/sbin/nvme smart-log /dev/nvme0 | grep temperature | awk '{printf "%.1f°C", $3+0.0}'}
+${font DejaVu Sans:size=12}${color2}ACPI Temperature ${goto 330}${execi 5 sensors -u | awk '/acpitz-acpi-0/,/^$/' | grep 'temp1_input' | awk '{printf "%.1f°C", $2+0.0}'}
+${font DejaVu Sans:size=12}${color2}Wi-Fi Temperature ${goto 330}${execi 5 sensors -u | awk '/iwlwifi_1-virtual-0/,/^$/' | grep 'temp1_input' | awk '{printf "%.1f°C", $2}'}
+
+${font DejaVu Sans:size=12}${color2}Geth Service ${goto 330}${color red}Active (No Internet)${color}
+${font DejaVu Sans:size=12}${color2}Lighthouse Beacon ${goto 330}${color red}Active (No Internet)${color}
+${font DejaVu Sans:size=12}${color2}Lighthouse Validator ${goto 330}${color red}Active (No Internet)${color}
+${font DejaVu Sans:size=12}${color2}Geth Sync Status ${goto 330}${color red}Not Synced (No Internet)${color}
+${font DejaVu Sans:size=12}${color2}Sync Status ${goto 330}${color red}Not Synced (No Internet)${color}
+${font DejaVu Sans:size=12}${color2}Active Validators ${goto 330}${color red}N/A (No Internet)${color}
+${font DejaVu Sans:size=12}${color2}Latest Block ${goto 330}${color red}N/A (No Internet)${color}
+${font DejaVu Sans:size=12}${color2}Geth Connected Peers ${goto 330}${color red}N/A (No Internet)${color}
+${font DejaVu Sans:size=12}${color2}Lighthouse Connected Peers ${goto 330}${color red}N/A (No Internet)${color}
+
+${color1}${font DejaVu Sans:bold:size=14}PLS Balance${font}
+${color5}${hr 4}
+${font DejaVu Sans:size=12}${color #E0E0E0}PLS Balance ${goto 330}${color red}N/A (No Internet)${color}
+${font DejaVu Sans:size=12}${color lightgrey}Last Increase ${goto 330}${color red}N/A (No Internet)${color}
+
+${endif}
+]]
 EOF
 
-echo "Conky configuration complete."
+# Create the check_internet.sh script
+mkdir -p ~/scripts
 
-# Create the pulsechain_balance.py script
-echo "Creating pulsechain_balance.py..."
-
-cat << 'EOF' > pulsechain_balance.py
-import requests
-import json
-import os
-from datetime import datetime
-
-# Replace these values with your own before using
-address_hash = 'your_address_hash'
-base_url = 'https://api.scan.pulsechain.com/api'
-last_balance_file = '/path/to/your/file/last_balance.json'
-
-def get_time_ago(timestamp):
-    if timestamp == 'Never':
-        return 'Never'
-    now = datetime.now()
-    diff = now - datetime.strptime(timestamp, '%Y-%m-%d %H:%M:%S')
-
-    days = diff.days
-    hours = diff.seconds // 3600
-    minutes = (diff.seconds % 3600) // 60
-
-    if days > 0:
-        return f"{days}d {hours}h {minutes}m ago"
-    elif hours > 0:
-        return f"{hours}h {minutes}m ago"
-    else:
-        return f"{minutes}m ago"
-
-def get_pls_info():
-    try:
-        response = requests.get(f'{base_url}?module=account&action=eth_get_balance&address={address_hash}')
-        data = response.json()
-        if 'result' in data:
-            current_balance = int(data['result'], 16) / 1e18  # Convert from Wei to PLS
-            last_data = load_last_data()
-            last_balance = last_data.get('balance', 0)
-            last_increase_time = last_data.get('last_increase_time', 'Never')
-            now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            
-            if current_balance > last_balance:
-                increase = current_balance - last_balance
-                save_last_data(current_balance, now, increase)
-                return f"{current_balance:.2f}\n{increase:.2f} PLS {get_time_ago(now)}"
-            else:
-                time_ago = get_time_ago(last_increase_time)
-                last_increase_value = last_data.get('last_increase_value', 0)
-                return f"{current_balance:.2f}\n{last_increase_value:.2f} PLS {time_ago}"
-    except Exception as e:
-        return f"Error: {str(e)}\nNo data"
-
-def load_last_data():
-    if os.path.exists(last_balance_file):
-        with open(last_balance_file, 'r') as f:
-            return json.load(f)
-    return {}
-
-def save_last_data(balance, time, increase=0):
-    with open(last_balance_file, 'w') as f:
-        json.dump({'balance': balance, 'last_increase_time': time, 'last_increase_value': increase}, f)
-
-if __name__ == "__main__":
-    print(get_pls_info())
-EOF
-
-# Replace placeholder values with user input
-echo "Please enter your ETH address for PLS balance tracking:"
-read address_hash
-
-sed -i "s/your_address_hash/$address_hash/g" pulsechain_balance.py
-
-# Ask the user where to save the JSON file for tracking the balance
-echo "Please specify the full path to save the balance data (e.g., /home/user/.pulsechain/last_balance.json):"
-read last_balance_file
-
-sed -i "s|/path/to/your/file/last_balance.json|$last_balance_file|g" pulsechain_balance.py
-
-echo "Creating the validator count script..."
-
-# Create the validator count script
-cat << 'EOF' > ~/validator_count.sh
-#!/bin/bash
-# Replace this line with the actual command to get your validator count
-lighthouse validators list | wc -l
-EOF
-
-# Create the check_sync.sh script
-echo "Creating the check_sync.sh script..."
-
-cat << 'EOF' > ~/check_sync.sh
+cat << 'EOF' > ~/scripts/check_internet.sh
 #!/bin/bash
 
-response=$(curl -s http://localhost:5052/eth/v1/node/syncing)
-is_syncing=$(echo "$response" | grep -oP '"is_syncing":\K(true|false)')
-
-if [ "$is_syncing" = "true" ]; then
-    echo '${color yellow}⟳ Syncing${color}'
+# Vérifie si la connexion Internet est disponible avec un timeout de 5 secondes
+if timeout 5 curl -s --head http://www.google.com/ | head -n 1 | grep -q "HTTP/"; then
+    echo "online"
 else
-    echo '${color green}✓ Synced${color}'
+    echo "offline"
 fi
 EOF
 
-# Create the validator_efficiency.py script
-echo "Creating the validator_efficiency.py script..."
+# Make the script executable
+chmod +x ~/scripts/check_internet.sh
 
-cat << 'EOF' > ~/validator_efficiency.py
-# This is a placeholder for the validator_efficiency.py script.
-# Please update this file with the actual content.
-EOF
+echo "Configuration completed. Starting Conky..."
 
-# Make the scripts executable
-chmod +x ~/validator_count.sh
-chmod +x ~/check_sync.sh
-chmod +x ~/validator_efficiency.py
-
-echo "Installation completed. You can now launch Conky with the following configuration:"
-echo "conky -c ~/.config/conky/conky.conf"
+# Start Conky
+conky -c ~/.config/conky/conky.conf &
 
