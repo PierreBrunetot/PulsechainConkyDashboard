@@ -5,8 +5,17 @@ A Conky-based monitoring dashboard for PulseChain validator nodes. This tool pro
 ## Features
 
 - Real-time monitoring of CPU, RAM, and disk usage
-- Display of Lighthouse Beacon, Lighthouse Validator, and Geth logs
+
+- Display of logs for Lighthouse Beacon, Lighthouse Validator, and Geth
+
+- Tracking of Geth Sync Status and Active Validators
+
+- Monitoring of the latest block
+
+- Geth and Lighthouse connected peers
+
 - PLS balance tracking
+
 - Customizable desktop wallpaper for Ubuntu
 
 ## Prerequisites
