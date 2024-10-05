@@ -2,13 +2,15 @@ import requests
 import json
 import os
 from datetime import datetime
+from requests.exceptions import RequestException
 
-# Replace these values with your own before using
-address_hash = 'your_address_hash'
+# Replace with your Ethereum address in the format 0x...
+address_hash = '0x...'  # Leave this as 0x... to fill in later
 base_url = 'https://api.scan.pulsechain.com/api'
-last_balance_file = '/path/to/your/file/last_balance.json'
+last_balance_file = 'last_balance.json'  # Relative path, change as needed
 
 def get_time_ago(timestamp):
+    """Returns the time elapsed since the given timestamp."""
     if timestamp == 'Never':
         return 'Never'
     now = datetime.now()
@@ -26,8 +28,10 @@ def get_time_ago(timestamp):
         return f"{minutes}m ago"
 
 def get_pls_info():
+    """Fetches balance information and rewards."""
     try:
-        response = requests.get(f'{base_url}?module=account&action=eth_get_balance&address={address_hash}')
+        response = requests.get(f'{base_url}?module=account&action=eth_get_balance&address={address_hash}', timeout=10)
+        response.raise_for_status()  # Raise an exception for HTTP error codes
         data = response.json()
         if 'result' in data:
             current_balance = int(data['result'], 16) / 1e18  # Convert from Wei to PLS
@@ -35,28 +39,55 @@ def get_pls_info():
             last_balance = last_data.get('balance', 0)
             last_increase_time = last_data.get('last_increase_time', 'Never')
             now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            # Check if it's the first run
+            if last_balance == 0:
+                # Initialize the data with the current balance
+                save_last_data(current_balance, now, 0)
+                return f"{current_balance:.2f}\nN/A (First Run)"
             
+            # Balance check
             if current_balance > last_balance:
                 increase = current_balance - last_balance
                 save_last_data(current_balance, now, increase)
                 return f"{current_balance:.2f}\n{increase:.2f} PLS {get_time_ago(now)}"
             else:
+                # Even if the balance hasn't increased, we update the recorded balance
+                # Save the time and last balance
+                save_last_data(current_balance, now, last_data.get('last_increase_value', 0))
                 time_ago = get_time_ago(last_increase_time)
                 last_increase_value = last_data.get('last_increase_value', 0)
                 return f"{current_balance:.2f}\n{last_increase_value:.2f} PLS {time_ago}"
+        else:
+            return "N/A\nN/A (Invalid API Response)"
+    except RequestException as e:
+        return f"N/A\nN/A (Connection Error: {str(e)})"
+    except json.JSONDecodeError:
+        return "N/A\nN/A (Invalid API Response)"
     except Exception as e:
-        return f"Error: {str(e)}\nNo data"
+        return f"N/A\nN/A (Error: {str(e)})"
 
 def load_last_data():
+    """Loads the last saved data."""
     if os.path.exists(last_balance_file):
-        with open(last_balance_file, 'r') as f:
-            return json.load(f)
+        try:
+            with open(last_balance_file, 'r') as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            return {}
     return {}
 
 def save_last_data(balance, time, increase=0):
-    with open(last_balance_file, 'w') as f:
-        json.dump({'balance': balance, 'last_increase_time': time, 'last_increase_value': increase}, f)
+    """Saves balance data and increase time."""
+    try:
+        with open(last_balance_file, 'w') as f:
+            json.dump({'balance': balance, 'last_increase_time': time, 'last_increase_value': increase}, f)
+    except Exception as e:
+        print(f"Error saving data: {str(e)}")
 
 if __name__ == "__main__":
-    print(get_pls_info())
+    try:
+        print(get_pls_info())
+    except Exception as e:
+        print(f"N/A\nN/A (Unexpected Error: {str(e)})")
 
