@@ -18,6 +18,9 @@ A Conky-based monitoring dashboard for PulseChain validator nodes. This tool pro
 - Connected Peers: Track the number of Geth and Lighthouse peers.
 - PLS Balance: Track your PLS balance directly within the system.
 - Validator Reward: Display the latest validator reward to stay updated on earnings.
+- Geth Version: Display the current version of Geth running on your node.
+- Lighthouse Version: Display the current version of Lighthouse running on your node.
+
 
 ## Prerequisites
 
